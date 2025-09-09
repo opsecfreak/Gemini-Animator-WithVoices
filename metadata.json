@@ -1,0 +1,5 @@
+{
+  "name": "AI Video Animator",
+  "description": "Generate a short video animation from a text prompt using the Gemini API. This application demonstrates the power of AI in creating dynamic visual content from simple descriptions.",
+  "requestFramePermissions": []
+}
