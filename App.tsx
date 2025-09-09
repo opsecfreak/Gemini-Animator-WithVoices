@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import PromptInput from './components/PromptInput';
 import VideoPlayer from './components/VideoPlayer';
-import LoadingIndicator from './components/LoadingIndicator';
+import ProgressBar from './components/ProgressBar';
+import TranscriptDisplay from './components/TranscriptDisplay';
 import { generateVideo } from './services/geminiService';
 
 const LOADING_MESSAGES = [
@@ -23,9 +24,11 @@ const App: React.FC = () => {
   const [addSpeech, setAddSpeech] = useState<boolean>(true);
   const [selectedVoice, setSelectedVoice] = useState<string>('en-US');
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [transcript, setTranscript] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
+  const [progress, setProgress] = useState<number>(0);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -46,11 +49,21 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setVideoUrl(null);
+    setTranscript(null);
+    setProgress(0);
 
     try {
       const script = addSpeech ? speechScript : undefined;
-      const url = await generateVideo(prompt, script, selectedVoice);
+      const { videoUrl: url, transcript: newTranscript } = await generateVideo(
+        prompt,
+        script,
+        selectedVoice,
+        (p) => setProgress(p)
+      );
       setVideoUrl(url);
+      if (newTranscript) {
+        setTranscript(newTranscript);
+      }
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
@@ -83,8 +96,24 @@ const App: React.FC = () => {
         </div>
         
         <div className="w-full max-w-4xl mt-8">
-          {isLoading && <LoadingIndicator message={loadingMessage} />}
-          {videoUrl && !isLoading && <VideoPlayer videoUrl={videoUrl} />}
+          {isLoading && <ProgressBar progress={progress} message={loadingMessage} />}
+          {videoUrl && !isLoading && (
+            <div className="space-y-6">
+              <VideoPlayer videoUrl={videoUrl} />
+              <a
+                href={videoUrl}
+                download="ai-generated-video.mp4"
+                className="w-full py-3 px-6 text-lg font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-all duration-300 flex items-center justify-center gap-2 transform active:scale-95"
+                aria-label="Download generated video"
+              >
+                Download Video
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </a>
+              {transcript && <TranscriptDisplay transcript={transcript} />}
+            </div>
+          )}
         </div>
       </main>
       <footer className="w-full max-w-4xl text-center text-gray-500 text-sm py-4">

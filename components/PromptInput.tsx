@@ -17,11 +17,10 @@ const VOICES = [
   { name: "English (US)", code: "en-US" },
   { name: "English (UK)", code: "en-GB" },
   { name: "English (Australia)", code: "en-AU" },
-  { name: "Spanish (Spain)", code: "es-ES" },
-  { name: "French (France)", code: "fr-FR" },
-  { name: "German (Germany)", code: "de-DE" },
-  { name: "Japanese (Japan)", code: "ja-JP" },
 ];
+
+const PROMPT_MAX_LENGTH = 500;
+const SCRIPT_MAX_LENGTH = 1000;
 
 const PromptInput: React.FC<PromptInputProps> = ({
   prompt,
@@ -46,16 +45,22 @@ const PromptInput: React.FC<PromptInputProps> = ({
     <div className="space-y-4">
       <div>
         <label htmlFor="prompt-input" className="block text-sm font-medium text-gray-400 mb-2">Video Prompt</label>
-        <textarea
-          id="prompt-input"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="e.g., A robot exploring a futuristic city at night..."
-          className="w-full h-28 p-4 bg-gray-900 border-2 border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 resize-none placeholder-gray-500"
-          disabled={isLoading}
-          aria-label="Video Prompt"
-        />
+        <div className="relative">
+          <textarea
+            id="prompt-input"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="e.g., A robot exploring a futuristic city at night..."
+            className="w-full h-28 p-4 bg-gray-900 border-2 border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 resize-none placeholder-gray-500"
+            disabled={isLoading}
+            aria-label="Video Prompt"
+            maxLength={PROMPT_MAX_LENGTH}
+          />
+          <span className="absolute bottom-2 right-3 text-xs text-gray-500">
+            {prompt.length} / {PROMPT_MAX_LENGTH}
+          </span>
+        </div>
       </div>
 
       <div className="flex items-center">
@@ -97,15 +102,21 @@ const PromptInput: React.FC<PromptInputProps> = ({
           </div>
           <div>
             <label htmlFor="speech-script-input" className="block text-sm font-medium text-gray-400 mb-2">Speech Script</label>
-            <textarea
-              id="speech-script-input"
-              value={speechScript}
-              onChange={(e) => setSpeechScript(e.target.value)}
-              placeholder="Enter the narration for the video..."
-              className="w-full h-20 p-4 bg-gray-900 border-2 border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 resize-none placeholder-gray-500"
-              disabled={isLoading}
-              aria-label="Speech Script"
-            />
+            <div className="relative">
+              <textarea
+                id="speech-script-input"
+                value={speechScript}
+                onChange={(e) => setSpeechScript(e.target.value)}
+                placeholder="Enter the narration for the video..."
+                className="w-full h-20 p-4 bg-gray-900 border-2 border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 resize-none placeholder-gray-500"
+                disabled={isLoading}
+                aria-label="Speech Script"
+                maxLength={SCRIPT_MAX_LENGTH}
+              />
+              <span className="absolute bottom-2 right-3 text-xs text-gray-500">
+                {speechScript.length} / {SCRIPT_MAX_LENGTH}
+              </span>
+            </div>
           </div>
         </div>
       )}
